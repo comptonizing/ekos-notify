@@ -23,7 +23,7 @@ AC_CHECK_HEADERS([math.h string.h stdlib.h glib.h])
 
 # FIND OPENCV
 AC_ARG_WITH([opencv],
-            [AC_HELP_STRING([--with-opencv=<opencv path>], [path to opencv installation])],
+            [AS_HELP_STRING([--with-opencv=<opencv path>], [path to opencv installation])],
             [opencvloc=$withval],
             [opencvloc=/usr])
 LDFLAGS="$LDFLAGS -L${opencvloc}/lib -Wl,--rpath=${opencvloc}/lib"
