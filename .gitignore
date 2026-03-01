@@ -21,3 +21,5 @@ Makefile
 Makefile.in
 *~
 *.o
+.cache
+compile_commands.json
