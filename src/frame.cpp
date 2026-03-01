@@ -16,6 +16,16 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
 	}
 	m_logBuffer = Gtk::TextBuffer::create();
 	m_tvLog->set_buffer(m_logBuffer);
+        builder->get_widget("buttonENHelp", m_buttonHelp);
+        builder->get_widget("buttonENSave", m_buttonSave);
+        builder->get_widget("entryENURL", m_entryURL);
+        builder->get_widget("entryENToken", m_entryToken);
+
+        m_buttonHelp->signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::help));
+        m_buttonSave->signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::saveConfig));
+
+        initConfig();
+
 	// m_httpClient = std::make_unique<httplib::Client>("https://app.lightbucket.co:443");
 }
 
@@ -62,5 +72,66 @@ void FrmMain::log(const std::string &msg, bool showTimestamp) {
 	return;
 }
 
+void FrmMain::initConfig() {
+        std::string url, token, more;
+        const gchar *args[3];
+        args[0] = g_get_user_config_dir();
+        args[1] = "ekosnotify.conf";
+        args[2] = NULL;
+        m_configFile = std::string(g_build_filenamev((gchar **) args));
+        std::ifstream stream(m_configFile);
+        if ( ! stream.is_open() ) {
+                log("No exiting configuration available\n");
+                return;
+        }
+        std::getline(stream, url);
+        std::getline(stream, token);
+        std::getline(stream, more);
+        if ( url == "" || token == "" || ! stream.eof()) {
+                log("Corrupted configuration detected\n");
+                char buff[512];
+                snprintf(buff, sizeof(buff),
+                                "Your configuration file (%s) is corrupted and will be deleted. "
+                                "You will have to re-enter your url and token.",
+                                m_configFile.c_str());
+                showError("Corrupted Configuration", buff);
+                stream.close();
+                std::remove(m_configFile.c_str());
+                return;
+        }
+        m_entryURL->set_text(url);
+        m_entryToken->set_text(token);
+        log("Found existing configuration\n");
+}
+
+void FrmMain::saveConfig() {
+        if ( m_entryURL->get_text() == "" || m_entryToken->get_text() == "" ) {
+                showError("Configuration Error",
+                                "You need to enter the username and API key in order to save it");
+                return;
+        }
+        log("Saving configuration\n");
+        std::ofstream stream(m_configFile);
+        stream << m_entryURL->get_text() << std::endl;
+        stream << m_entryToken->get_text() << std::endl;
+        stream.close();
+}
+
+void FrmMain::help() {
+        Glib::ustring msg = "You need to give a full ULR for your gotify "
+            "instance and the token of the application used to send the push "
+            "notifications for"
+            ;
+        m_dialog.reset(new Gtk::MessageDialog(*this, msg, false,
+                                Gtk::MessageType::MESSAGE_INFO, Gtk::ButtonsType::BUTTONS_CLOSE,
+                                true));
+        m_dialog->set_title("Gotify Help");
+        m_dialog->set_modal(true);
+        m_dialog->signal_response().connect([this](int response) {
+                std::ignore = response;
+                        m_dialog->hide();
+                        });
+        m_dialog->show();
+}
 
 }

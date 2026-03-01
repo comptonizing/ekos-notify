@@ -85,7 +85,7 @@ Author: Philipp Weber
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entryENUser">
+                  <object class="GtkEntry" id="entryENURL">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="hexpand">True</property>
@@ -98,7 +98,7 @@ Author: Philipp Weber
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entryENKey">
+                  <object class="GtkEntry" id="entryENToken">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="hexpand">True</property>

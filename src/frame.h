@@ -31,6 +31,9 @@ namespace EN {
 		private:
 			void showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage = "");
 			void log(const std::string &msg, bool showTimestamp = true);
+                        void initConfig();
+                        void saveConfig();
+                        void help();
 
 			Glib::RefPtr<Gtk::Builder> builder;
 			Glib::RefPtr<Gio::DBus::Connection> m_dbus;
@@ -39,7 +42,10 @@ namespace EN {
 			std::unique_ptr<Gtk::MessageDialog> m_dialog;
 			Gtk::TextView *m_tvLog;
 			Glib::Dispatcher m_logDispatcher;
+                        Gtk::Button *m_buttonHelp, *m_buttonSave;
+                        Gtk::Entry *m_entryURL, *m_entryToken;
 
+                        std::string m_configFile;
 			std::mutex m_logMutex;
 
 			std::unique_ptr<httplib::Client> m_httpClient = nullptr;
