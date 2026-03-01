@@ -31,7 +31,6 @@ namespace EN {
 		private:
 			void showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage = "");
 			void log(const std::string &msg, bool showTimestamp = true);
-			bool quit(_GdkEventAny* event);
 
 			Glib::RefPtr<Gtk::Builder> builder;
 			Glib::RefPtr<Gio::DBus::Connection> m_dbus;

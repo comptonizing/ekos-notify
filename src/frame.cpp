@@ -16,15 +16,10 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
 	}
 	m_logBuffer = Gtk::TextBuffer::create();
 	m_tvLog->set_buffer(m_logBuffer);
-	signal_delete_event().connect(sigc::mem_fun(*this, &FrmMain::quit));
 	// m_httpClient = std::make_unique<httplib::Client>("https://app.lightbucket.co:443");
 }
 
 FrmMain::~FrmMain() {
-}
-
-bool FrmMain::quit(_GdkEventAny* event) {
-	return true;
 }
 
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
