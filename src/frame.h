@@ -16,6 +16,7 @@
 #include <glibmm/fileutils.h>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
+#include "json.hpp"
 #include "httplib.h"
 
 #include "gui.h"
@@ -33,7 +34,9 @@ namespace EN {
 			void log(const std::string &msg, bool showTimestamp = true);
                         void initConfig();
                         void saveConfig();
-                        void help();
+                        void test();
+                        bool gotifyOK();
+                        void push(std::string &title, std::string &msg, int priority);
 
 			Glib::RefPtr<Gtk::Builder> builder;
 			Glib::RefPtr<Gio::DBus::Connection> m_dbus;
@@ -42,7 +45,7 @@ namespace EN {
 			std::unique_ptr<Gtk::MessageDialog> m_dialog;
 			Gtk::TextView *m_tvLog;
 			Glib::Dispatcher m_logDispatcher;
-                        Gtk::Button *m_buttonHelp, *m_buttonSave;
+                        Gtk::Button *m_buttonTest, *m_buttonSave;
                         Gtk::Entry *m_entryURL, *m_entryToken;
 
                         std::string m_configFile;

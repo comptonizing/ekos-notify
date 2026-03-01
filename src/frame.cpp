@@ -16,12 +16,19 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
 	}
 	m_logBuffer = Gtk::TextBuffer::create();
 	m_tvLog->set_buffer(m_logBuffer);
-        builder->get_widget("buttonENHelp", m_buttonHelp);
+        builder->get_widget("buttonENTest", m_buttonTest);
         builder->get_widget("buttonENSave", m_buttonSave);
         builder->get_widget("entryENURL", m_entryURL);
         builder->get_widget("entryENToken", m_entryToken);
 
-        m_buttonHelp->signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::help));
+        m_buttonTest->signal_clicked().connect([&]() {
+                std::thread([&]() {
+                        test();
+                        }).detach();
+                });
+
+
+                // sigc::mem_fun(*this, &FrmMain::test));
         m_buttonSave->signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::saveConfig));
 
         initConfig();
@@ -117,21 +124,59 @@ void FrmMain::saveConfig() {
         stream.close();
 }
 
-void FrmMain::help() {
-        Glib::ustring msg = "You need to give a full ULR for your gotify "
-            "instance and the token of the application used to send the push "
-            "notifications for"
-            ;
-        m_dialog.reset(new Gtk::MessageDialog(*this, msg, false,
-                                Gtk::MessageType::MESSAGE_INFO, Gtk::ButtonsType::BUTTONS_CLOSE,
-                                true));
-        m_dialog->set_title("Gotify Help");
-        m_dialog->set_modal(true);
-        m_dialog->signal_response().connect([this](int response) {
-                std::ignore = response;
-                        m_dialog->hide();
-                        });
-        m_dialog->show();
+void FrmMain::test() {
+    if ( ! gotifyOK() ) {
+        log("Gotify settings missing\n");
+    }
+    log("Testing gotify\n");
+    try {
+        std::string title = "Ekos test message";
+        std::string msg = "This is a test from ekos notify";
+        push(title, msg, 5);
+    } catch (std::runtime_error &e) {
+        log("Failure: ");
+        log(e.what(), false);
+        log("\n", false);
+        return;
+    } catch (...) {
+        log("Failure\n");
+        return;
+    }
+    log("Success\n");
+}
+
+bool FrmMain::gotifyOK() {
+    return m_entryURL->get_text() != "" && m_entryToken->get_text() != "";
+}
+
+void FrmMain::push(std::string &title, std::string &msg, int priority) {
+    if ( ! gotifyOK () ) {
+        throw std::runtime_error("Gotify settings missing");
+    }
+    nlohmann::json json;
+    json["message"] = msg;
+    json["title"] = title;
+    json["priority"] = priority;
+    json["extras"]["client::display"]["contentType"] = "text/markdown";
+
+    char buffURL[256];
+    snprintf(buffURL, sizeof(buffURL)-1, "/message?token=%s", m_entryToken->get_text().c_str());
+
+    auto client = httplib::Client(m_entryURL->get_text());
+    client.set_follow_location(true);
+    httplib::Headers headers = {
+            {"AContent-Type", "application/json"}
+    };
+    auto result = client.Post(buffURL, json.dump(), "application/json");
+    if ( ! result ) {
+        auto error = result.error();
+        throw std::runtime_error(std::string("Error posting data to server: ") + httplib::to_string(error));
+    }
+    if ( result->status != httplib::StatusCode::OK_200 ) {
+                char buff[256];
+                snprintf(buff, sizeof(buff), "Got HTTP response %d instead of 200", result->status);
+                throw std::runtime_error(buff);
+    }
 }
 
 }
