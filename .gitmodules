@@ -1,0 +1,3 @@
+[submodule "kstars"]
+	path = kstars
+	url = https://invent.kde.org/education/kstars.git
