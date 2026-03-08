@@ -21,15 +21,6 @@ AC_ARG_ENABLE([debugging], AS_HELP_STRING([--enable-debugging], [Enable debuggin
 # LIBRARIES
 AC_CHECK_HEADERS([math.h string.h stdlib.h glib.h])
 
-# FIND OPENCV
-AC_ARG_WITH([opencv],
-            [AS_HELP_STRING([--with-opencv=<opencv path>], [path to opencv installation])],
-            [opencvloc=$withval],
-            [opencvloc=/usr])
-LDFLAGS="$LDFLAGS -L${opencvloc}/lib -Wl,--rpath=${opencvloc}/lib"
-CXXFLAGS="$CXXFLAGS -isystem${opencvloc}/include/opencv4"
-AC_SUBST([OPENCVSLOC], [$opencvloc])
-
 AC_SEARCH_LIBS(sin, m, [], [AC_MSG_ERROR([No math library found!])], [])
 AC_SEARCH_LIBS(g_log, glib-2.0, [], [AC_MSG_ERROR([libglib-2.0 not found!])], [])
 AC_SEARCH_LIBS(gtk_application_new, gtk-3, [], [AC_MSG_ERROR([gtk-3 library not found!])])
