@@ -126,9 +126,11 @@ namespace EN {
                         // Actual processing of signals
                         void processSignal(const SignalData &data);
                         bool onEkosStatusChanged(const SignalData &data);
+                        bool onEkosNewDevice(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
-                            &FrmMain::onEkosStatusChanged
+                            &FrmMain::onEkosStatusChanged,
+                            &FrmMain::onEkosNewDevice,
                         };
 	};
 }

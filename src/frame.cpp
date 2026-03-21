@@ -98,13 +98,30 @@ bool FrmMain::onEkosStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
-    std::string notification = m_ekosStatusNotificationMap[status];
-    if ( ! m_notificationMap[notification].enabled ) {
+    std::string nf = m_ekosStatusNotificationMap[status];
+    if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
-    push(m_notificationMap[notification].description,
-         m_notificationMap[notification].description,
-         m_notificationMap[notification].priority);
+    push(m_notificationMap[nf].description,
+         m_notificationMap[nf].description,
+         m_notificationMap[nf].priority);
+    return true;
+}
+
+bool FrmMain::onEkosNewDevice(const SignalData &data) {
+    if ( data.signal != "newDevice" || data.object != "/KStars/Ekos" || data.interface != "org.kde.kstars.Ekos" ) {
+        return false;
+    }
+    std::string nf = "ekosNewDevice";
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    std::string device = Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(inside).get();
+    std::string msg = "New device connected to ekos: ";
+    msg += device;
+    push(msg, msg, m_notificationMap[nf].priority);
     return true;
 }
 
@@ -387,7 +404,7 @@ void FrmMain::push(std::string &title, std::string &msg, int priority) {
     json["priority"] = priority;
     json["extras"]["client::display"]["contentType"] = "text/markdown";
 
-    log(std::string("Notification: ") + title);
+    log(std::string("Notification: ") + title + "\n");
 
     char buffURL[256];
     snprintf(buffURL, sizeof(buffURL)-1, "/message?token=%s", m_entryToken->get_text().c_str());
