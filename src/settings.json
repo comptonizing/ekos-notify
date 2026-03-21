@@ -1,0 +1,6 @@
+[
+  ["ekosStatusChangedToIdle",           "Ekos main status changed to idle",     1,      false],
+  ["ekosStatusChangedToPending",        "Ekos main status changed to pending",  1,      false],
+  ["ekosStatusChangedToSuccess",        "Ekos main status changed to success",  1,      false],
+  ["ekosStatusChangedToError",          "Ekos main status changed to error",    1,      false]
+]

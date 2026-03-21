@@ -5,6 +5,12 @@ gui.h: ekosnotify.glade Makefile
 	cat $< >> $@
 	echo ")\";" >> $@
 
-ekosnotify_DEPENDENCIES=gui.h
+settings.h: settings.json
+	python -m json.tool $<
+	echo -e "#include <iostream>\nconst std::string __defaultSettingsData = R\"(" > $@
+	cat $< >> $@
+	echo ")\";" >> $@
 
-ekosnotify_SOURCES=gui.h main.cpp frame.h frame.cpp
+ekosnotify_DEPENDENCIES=gui.h settings.h
+
+ekosnotify_SOURCES=gui.h settings.h main.cpp frame.h frame.cpp

@@ -1,7 +1,4 @@
 #include "frame.h"
-#include <exception>
-#include <memory>
-#include <opencv2/imgcodecs.hpp>
 #include <stdexcept>
 
 namespace EN {
@@ -20,6 +17,7 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
         builder->get_widget("buttonENSave", m_buttonSave);
         builder->get_widget("entryENURL", m_entryURL);
         builder->get_widget("entryENToken", m_entryToken);
+        builder->get_widget("buttonNotificationSettings", m_buttonSettings);
 
         m_buttonTest->signal_clicked().connect([&]() {
                 std::thread([&]() {
@@ -27,16 +25,70 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
                         }).detach();
                 });
 
+        m_buttonSettings->signal_clicked().connect([&]() {
+                auto win = std::make_unique<NotificationSettingsWindow>(
+                        m_notificationDescriptions,
+                        m_notificationPriorities,
+                        m_notificationEnabled
+                        );
+                win->set_title("Notification settings");
+                m_settingsWindow = std::move(win);
+                m_settingsWindow->signal_value_chagned().connect([&]() {
+                        writeSettingsConfig();
+                        });
+                m_settingsWindow->show();
+                });
 
-                // sigc::mem_fun(*this, &FrmMain::test));
+
+
         m_buttonSave->signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::saveConfig));
 
-        initConfig();
+        signal_realize().connect([this](){
+                std::thread([this]() {
+                        initConfig();
+                        }).detach();
+                });
 
-	// m_httpClient = std::make_unique<httplib::Client>("https://app.lightbucket.co:443");
+        m_dbus->signal_subscribe(sigc::mem_fun(*this, &FrmMain::onSignal), "org.kde.kstars",  "", "", "", "");
 }
 
 FrmMain::~FrmMain() {
+}
+
+void FrmMain::onSignal(
+  const Glib::RefPtr<Gio::DBus::Connection>& connection,
+  const Glib::ustring &sender_name,
+  const Glib::ustring &object_path,
+  const Glib::ustring &interface_name,
+  const Glib::ustring &signal_name,
+  const Glib::VariantContainerBase& parameters
+) {
+    std::ignore = connection;
+
+
+    SignalData data = {sender_name, object_path, interface_name, signal_name, parameters};
+    std::thread([&, data]() {
+            processSignal(data);
+            }).detach();
+}
+
+void FrmMain::processSignal(const SignalData &data) {
+    std::cout << "Got signal" << std::endl;
+    std::cout << "From: " << data.sender << std::endl;
+    std::cout << "Object: " << data.object << std::endl;
+    std::cout << "Interface: " << data.interface << std::endl;
+    std::cout << "Signal: " << data.signal << std::endl;
+    std::cout << data.parameters.get_type_string() << " " << data.parameters.print() << std::endl << std::endl;
+
+    for ( auto cb : m_dispatchTable ) {
+        if ( (this->*cb)(data) ) {
+            return;
+        }
+    }
+}
+
+bool FrmMain::onEkosStatusChanged(const SignalData &data) {
+    return false;
 }
 
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
@@ -83,32 +135,178 @@ void FrmMain::initConfig() {
         std::string url, token, more;
         const gchar *args[3];
         args[0] = g_get_user_config_dir();
-        args[1] = "ekosnotify.conf";
+        args[1] = "ekosnotify_credentials.conf";
         args[2] = NULL;
-        m_configFile = std::string(g_build_filenamev((gchar **) args));
-        std::ifstream stream(m_configFile);
-        if ( ! stream.is_open() ) {
-                log("No exiting configuration available\n");
-                return;
+        m_credentialsFile = std::string(g_build_filenamev((gchar **) args));
+        std::ifstream stream(m_credentialsFile);
+        if ( stream.is_open() ) {
+            std::getline(stream, url);
+            std::getline(stream, token);
+            std::getline(stream, more);
+            if ( url == "" || token == "" || ! stream.eof()) {
+                    log("Corrupted gotify configuration detected\n");
+                    char buff[512];
+                    snprintf(buff, sizeof(buff),
+                                    "Your gotify configuration file (%s) is corrupted and will be deleted. "
+                                    "You will have to re-enter your url and token.",
+                                    m_credentialsFile.c_str());
+                    showError("Corrupted Gotify Configuration", buff);
+                    stream.close();
+                    std::remove(m_credentialsFile.c_str());
+                    return;
+            }
+            m_entryURL->set_text(url);
+            m_entryToken->set_text(token);
+            log("Found existing gotify configuration\n");
+        } else {
+            log("No exiting gotify configuration available\n");
         }
-        std::getline(stream, url);
-        std::getline(stream, token);
-        std::getline(stream, more);
-        if ( url == "" || token == "" || ! stream.eof()) {
-                log("Corrupted configuration detected\n");
-                char buff[512];
-                snprintf(buff, sizeof(buff),
-                                "Your configuration file (%s) is corrupted and will be deleted. "
-                                "You will have to re-enter your url and token.",
-                                m_configFile.c_str());
-                showError("Corrupted Configuration", buff);
-                stream.close();
-                std::remove(m_configFile.c_str());
-                return;
+
+        auto defaultsJson = nlohmann::json::parse(__defaultSettingsData);
+        for (const auto& change : defaultsJson) {
+            m_defaultNotificationIds.push_back(Glib::ustring(change[0].template get<std::string>()));
+            m_defaultNotificationDescriptions.push_back(Glib::ustring(change[1].template get<std::string>()));
+            m_defaultNotificationPriorities.push_back(change[2].template get<int>());
+            m_defaultNotificationEnabled.push_back(change[3].template get<bool>());
         }
-        m_entryURL->set_text(url);
-        m_entryToken->set_text(token);
-        log("Found existing configuration\n");
+
+        args[1] = "ekosnotify_notifications.conf";
+        m_settingsFile = std::string(g_build_filenamev((gchar **) args));
+        log("Reading notification settings\n");
+        if ( readSettingsConfig() ) {
+            bool modified = false;
+
+            // Include possibly new notifications
+            for (size_t ii=0; ii<m_defaultNotificationIds.size(); ii++) {
+                if ( std::count(m_notificationIds.begin(), m_notificationIds.end(), m_defaultNotificationIds[ii]) ) {
+                    continue;
+                }
+                log(std::string("Adding new notification " + m_defaultNotificationIds[ii] + "\n"));
+                m_notificationIds.push_back(m_defaultNotificationIds[ii]);
+                m_notificationDescriptions.push_back(m_defaultNotificationDescriptions[ii]);
+                m_notificationPriorities.push_back(m_defaultNotificationPriorities[ii]);
+                m_notificationEnabled.push_back(m_defaultNotificationEnabled[ii]);
+                modified = true;
+            }
+
+            // Remove possibly obsolete notifications
+            std::vector<size_t> listOK;
+            for (size_t ii=0; ii<m_notificationIds.size(); ii++) {
+                if ( std::count(m_defaultNotificationIds.begin(), m_defaultNotificationIds.end(), m_notificationIds[ii]) ) {
+                    listOK.push_back(ii);
+                } else {
+                    log(std::string("Removing obsolete notification " + m_notificationIds[ii] + "\n"));
+                }
+            }
+            if ( listOK.size() != m_notificationIds.size() ) {
+                std::vector<Glib::ustring> notificationIds;
+                std::vector<Glib::ustring> notificationDescriptions;
+                std::vector<int> notificationPriorities;
+                std::vector<bool> notificationEnabled;
+                for (size_t ii=0; ii<listOK.size(); ii++) {
+                    notificationIds.push_back(m_notificationIds[ii]);
+                    notificationDescriptions.push_back(m_notificationDescriptions[ii]);
+                    notificationPriorities.push_back(m_notificationPriorities[ii]);
+                    notificationEnabled.push_back(m_notificationEnabled[ii]);
+                }
+                m_notificationIds = notificationIds;
+                m_notificationDescriptions = notificationDescriptions;
+                m_notificationPriorities = notificationPriorities;
+                m_notificationEnabled = notificationEnabled;
+                modified = true;
+            }
+
+            // Update description
+            for (size_t ii=0; ii<m_notificationIds.size(); ii++) {
+                for (size_t jj=0; jj<m_defaultNotificationIds.size(); jj++) {
+                    if ( m_notificationIds[ii] == m_defaultNotificationIds[jj] &&
+                            m_notificationDescriptions[ii] != m_defaultNotificationDescriptions[jj] ) {
+                        log(std::string("Updating description for " + m_notificationIds[ii]) + "\n");
+                        m_notificationDescriptions[ii] = m_defaultNotificationDescriptions[jj];
+                    }
+                }
+            }
+
+            if ( modified ) {
+                writeSettingsConfig();
+            }
+        } else {
+            log("Using default notification settings\n");
+            m_notificationIds = m_defaultNotificationIds;
+            m_notificationDescriptions = m_defaultNotificationDescriptions;
+            m_notificationPriorities = m_defaultNotificationPriorities;
+            m_notificationEnabled = m_defaultNotificationEnabled;
+            writeSettingsConfig();
+        }
+}
+
+bool FrmMain::readSettingsConfig() {
+    m_notificationIds.clear();
+    m_notificationDescriptions.clear();
+    m_notificationPriorities.clear();
+    m_notificationEnabled.clear();
+    std::ifstream stream(m_settingsFile);
+    if ( ! stream.is_open() ) {
+        std::string msg = "Notification settings file " + m_settingsFile + " not found\n";
+        log(msg);
+        return false;
+    }
+    try {
+        nlohmann::json settings;
+        stream >> settings;
+        if ( ! settings.is_array() ) {
+            throw std::runtime_error("No array in json file");
+        }
+        for ( const auto& setting : settings ) {
+            if ( ! setting.is_array() ||
+                    setting.size() != 4 ||
+                    ! setting[0].is_string() ||
+                    ! setting[1].is_string() ||
+                    ! setting[2].is_number_integer() ||
+                    ! setting[3].is_boolean()
+                    ) {
+                std::string msg = "Found malformed part in notification settings file: \"" + setting.dump() + "\"\nignoring\n";
+                log(msg);
+                continue;
+            }
+            m_notificationIds.push_back(setting[0].template get<std::string>());
+            m_notificationDescriptions.push_back(setting[1].template get<std::string>());
+            m_notificationPriorities.push_back(setting[2].template get<int>());
+            m_notificationEnabled.push_back(setting[3].template get<bool>());
+        }
+    } catch (const std::exception& e) {
+        std::string msg = "Malformed notification settings file " + m_settingsFile + " found, have to remove it\n";
+        log(msg);
+        stream.close();
+        std::remove(m_settingsFile.c_str());
+        m_notificationIds.clear();
+        m_notificationDescriptions.clear();
+        m_notificationPriorities.clear();
+        m_notificationEnabled.clear();
+        return false;
+    }
+    return true;
+}
+
+bool FrmMain::writeSettingsConfig() {
+    std::ofstream out(m_settingsFile);
+    if ( ! out.is_open() ) {
+        log(std::string("Could not write to settings file ") + m_settingsFile + "\n");
+        return false;
+    }
+    nlohmann::json j;
+    for (size_t ii=0; ii<m_notificationIds.size(); ii++) {
+        j.push_back(
+                {m_notificationIds[ii], m_notificationDescriptions[ii], m_notificationPriorities[ii], m_notificationEnabled[ii]}
+                );
+    }
+    out << j.dump(4) << std::endl;
+    if ( ! out ) {
+        log(std::string("Could not write to settings file ") + m_settingsFile + "\n");
+        return false;
+    }
+    out.close();
+    return true;
 }
 
 void FrmMain::saveConfig() {
@@ -118,7 +316,7 @@ void FrmMain::saveConfig() {
                 return;
         }
         log("Saving configuration\n");
-        std::ofstream stream(m_configFile);
+        std::ofstream stream(m_credentialsFile);
         stream << m_entryURL->get_text() << std::endl;
         stream << m_entryToken->get_text() << std::endl;
         stream.close();
@@ -132,7 +330,7 @@ void FrmMain::test() {
     try {
         std::string title = "Ekos test message";
         std::string msg = "This is a test from ekos notify";
-        push(title, msg, 5);
+        push(title, msg, 10);
     } catch (std::runtime_error &e) {
         log("Failure: ");
         log(e.what(), false);
@@ -177,6 +375,53 @@ void FrmMain::push(std::string &title, std::string &msg, int priority) {
                 snprintf(buff, sizeof(buff), "Got HTTP response %d instead of 200", result->status);
                 throw std::runtime_error(buff);
     }
+}
+
+NotificationSettingsWindow::NotificationSettingsWindow(std::vector<Glib::ustring> &labels,
+        std::vector<int> &levels,
+        std::vector<bool> &enabled) {
+    assert(labels.size() == levels.size() && levels.size() == enabled.size());
+    set_title("Notification settings");
+    set_default_size(400, 300);
+    add(m_scrolledWindow);
+    m_scrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_scrolledWindow.add(m_grid);
+    m_grid.set_row_spacing(5);
+    m_grid.set_column_spacing(10);
+
+    for (size_t ii=0; ii<labels.size(); ii++) {
+        Gtk::Label* label = Gtk::make_managed<Gtk::Label>(labels[ii]);
+        label->set_xalign(0.0);
+        label->set_hexpand(true);
+        m_grid.attach(*label, 0, ii, 1, 1);
+        auto adjustment = Gtk::Adjustment::create(1, 1, 10, 1);
+        Gtk::SpinButton* spin = Gtk::make_managed<Gtk::SpinButton>(adjustment, 1.0, 0);
+        spin->set_value(levels[ii]);
+        spin->set_hexpand(true);
+        spin->signal_value_changed().connect([this, spin, ii, &levels]() {
+                levels[ii] = spin->get_value();
+                m_signal_value_changed.emit();
+                });
+        m_grid.attach(*spin, 1, ii, 1, 1);
+        Gtk::Switch* sw = Gtk::make_managed<Gtk::Switch>();
+        sw->set_active(enabled[ii]);
+        sw->set_hexpand(true);
+        sw->property_state().signal_changed().connect([this, sw, ii, &enabled](){
+                enabled[ii] = sw->get_active();
+                m_signal_value_changed.emit();
+                });
+        m_grid.attach(*sw, 2, ii, 1, 1);
+    }
+    show_all_children();
+}
+
+bool NotificationSettingsWindow::onSwitchChange(bool state) {
+                if ( state ) {
+                    std::cout << "Turned on" << std::endl;
+                } else {
+                    std::cout << "Turned off" << std::endl;
+                }
+                return false;
 }
 
 }
