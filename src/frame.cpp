@@ -168,7 +168,6 @@ bool FrmMain::onAlignNewSolution(const SignalData &data) {
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
-    std::cout << "Processing new align status" << std::endl;
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
@@ -197,6 +196,34 @@ bool FrmMain::onAlignStatusChanged(const SignalData &data) {
     push(m_notificationMap[nf].description,
          m_notificationMap[nf].description,
          m_notificationMap[nf].priority);
+    return true;
+}
+
+bool FrmMain::onCaptureComplete(const SignalData &data) {
+    if ( data.signal != "captureComplete" || data.object != "/KStars/Ekos/Capture" || data.interface != "org.kde.kstars.Ekos.Capture" ) {
+        return false;
+    }
+    std::string nf = "captureCaptureComplete";
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
+    std::string msg = "";
+    for (gsize ii=0; ii<content.get_n_children(); ii++) {
+        auto thing = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(content.get_child(ii));
+        Glib::VariantBase child;
+        thing.get_child(child);
+        auto name = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(child).get();
+        auto value = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(thing.get_child(1)).get_child(0);
+        if ( name == "filename" ) {
+            auto fileName = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(value).get();
+            if ( fileName == "/tmp/image.fits" || fileName == "" || fileName == " " ) {
+                // Preview
+                return true;
+            }
+        }
+        msg += name + ": " + value.print() + "\n\n"; // Double newline required for message formatting
+    }
+    push(m_notificationMap[nf].description, msg, m_notificationMap[nf].priority);
     return true;
 }
 

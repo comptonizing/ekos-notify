@@ -20,5 +20,6 @@
   ["alignStatusChangedToSyncing",	"Align status changed to syncing",		1,	false],
   ["alignStatusChangedToSlewing",	"Align status changed to slewing",		1,	false],
   ["alignStatusChangedToRotating",	"Align status changed to rotating",		1,	false],
-  ["alignStatusChangedToSuspended",	"Align status changed to suspended",		1,	false]
+  ["alignStatusChangedToSuspended",	"Align status changed to suspended",		1,	false],
+  ["captureCaptureComplete",		"Ekos completed a capture",			3,	true]
 ]
