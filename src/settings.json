@@ -10,5 +10,15 @@
   ["ekosNewDevice",			"New device connected to ekos",			1,	false],
   ["ekosNewLog",			"New log in ekos",				1,	false],
   ["alignNewLog",			"New log in align module",			1,	false],
-  ["alignNewSolution",			"New solution in align module",			1,	false]
+  ["alignNewSolution",			"New solution in align module",			1,	false],
+  ["alignStatusChangedToIdle",		"Align status changed to idle",			1,	false],
+  ["alignStatusChangedToCompleted",	"Align status changed to completed",		1,	false],
+  ["alignStatusChangedToFailed",	"Align status changed to failed",		1,	false],
+  ["alignStatusChangedToAborted",	"Align status changed to aborted",		1,	false],
+  ["alignStatusChangedToProgress",	"Align status changed to in progress",		1,	false],
+  ["alignStatusChangedToSuccess",	"Align status changed to success",		1,	false],
+  ["alignStatusChangedToSyncing",	"Align status changed to syncing",		1,	false],
+  ["alignStatusChangedToSlewing",	"Align status changed to slewing",		1,	false],
+  ["alignStatusChangedToRotating",	"Align status changed to rotating",		1,	false],
+  ["alignStatusChangedToSuspended",	"Align status changed to suspended",		1,	false]
 ]

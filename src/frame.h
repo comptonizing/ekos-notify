@@ -124,6 +124,14 @@ namespace EN {
                             {"org.kde.kstars.Ekos", "ekosNewLog"},
                             {"org.kde.kstars.Ekos.Align", "alignNewLog"}
                         };
+
+                        std::vector<std::string> m_alignStatusNotificationMap = {
+                            "alignStatusChangedToIdle", "alignStatusChangedToCompleted",
+                            "alignStatusChangedToFailed", "alignStatusChangedToAborted",
+                            "alignStatusChangedToProgress", "alignStatusChangedToSuccess",
+                            "alignStatusChangedToSyncing", "alignStatusChangedToSlewing",
+                            "alignStatusChangedToRotating", "alignStatusChangedToSuspended"
+                        };
                         
                         struct SignalData {
                             const Glib::ustring sender;
@@ -140,13 +148,15 @@ namespace EN {
                         bool onEkosSettleStatusChanged(const SignalData &data);
                         bool onNewLog(const SignalData &data);
                         bool onAlignNewSolution(const SignalData &data);
+                        bool onAlignStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
                             &FrmMain::onEkosNewDevice,
                             &FrmMain::onEkosSettleStatusChanged,
                             &FrmMain::onNewLog,
-                            &FrmMain::onAlignNewSolution
+                            &FrmMain::onAlignNewSolution,
+                            &FrmMain::onAlignStatusChanged
                         };
 	};
 }
