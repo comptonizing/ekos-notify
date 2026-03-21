@@ -125,6 +125,25 @@ bool FrmMain::onEkosNewDevice(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onNewLog(const SignalData &data) {
+    if ( data.signal != "newLog" ) {
+        return false;
+    }
+    if ( ! m_logInterfaceNotificationMap.count(data.interface) ) {
+        // Correct handler, but no notification set up
+        return true;
+    }
+    std::string nf = m_logInterfaceNotificationMap[data.interface];
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    std::string log = Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(inside).get();
+    push(m_notificationMap[nf].description, log, m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));

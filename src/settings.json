@@ -3,5 +3,6 @@
   ["ekosStatusChangedToPending",	"Ekos main status changed to pending",	1,	false],
   ["ekosStatusChangedToSuccess",	"Ekos main status changed to success",	1,	false],
   ["ekosStatusChangedToError",		"Ekos main status changed to error",	10,	true],
-  ["ekosNewDevice",			"New device connected to ekos",		1,	false]
+  ["ekosNewDevice",			"New device connected to ekos",		1,	false],
+  ["ekosNewLog",			"New log in ekos",			1,	false]
 ]
