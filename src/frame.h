@@ -74,7 +74,7 @@ namespace EN {
                         Gtk::Entry *m_entryURL, *m_entryToken;
 
                         std::string m_settingsFile, m_credentialsFile;
-			std::mutex m_logMutex;
+			std::mutex m_logMutex, m_signalMutex;
 
                         std::unique_ptr<NotificationSettingsWindow> m_settingsWindow = nullptr;
 
@@ -139,12 +139,14 @@ namespace EN {
                         bool onEkosNewDevice(const SignalData &data);
                         bool onEkosSettleStatusChanged(const SignalData &data);
                         bool onNewLog(const SignalData &data);
+                        bool onAlignNewSolution(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
                             &FrmMain::onEkosNewDevice,
                             &FrmMain::onEkosSettleStatusChanged,
-                            &FrmMain::onNewLog
+                            &FrmMain::onNewLog,
+                            &FrmMain::onAlignNewSolution
                         };
 	};
 }

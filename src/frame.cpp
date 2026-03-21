@@ -79,6 +79,7 @@ void FrmMain::onSignal(
 }
 
 void FrmMain::processSignal(const SignalData &data) {
+    std::lock_guard<std::mutex> lock(m_signalMutex);
     std::cout << "Got signal" << std::endl;
     std::cout << "From: " << data.sender << std::endl;
     std::cout << "Object: " << data.object << std::endl;
@@ -156,6 +157,31 @@ bool FrmMain::onNewLog(const SignalData &data) {
     data.parameters.get_child(inside, 0);
     std::string log = Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(inside).get();
     push(m_notificationMap[nf].description, log, m_notificationMap[nf].priority);
+    return true;
+}
+
+bool FrmMain::onAlignNewSolution(const SignalData &data) {
+    if ( data.signal != "newSolution" || data.object != "/KStars/Ekos/Align" || data.interface != "org.kde.kstars.Ekos.Align" ) {
+        return false;
+    }
+    std::string nf = "alignNewSolution";
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    std::cout << "Processing new align status" << std::endl;
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
+    std::string msg = "";
+    for (gsize ii=0; ii<content.get_n_children(); ii++) {
+        auto thing = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(content.get_child(ii));
+        Glib::VariantBase child;
+        thing.get_child(child);
+        auto name = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(child).get();
+        auto value = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(thing.get_child(1)).get_child(0);
+        msg += name + ": " + value.print() + "\n\n"; // Double newline required for message formatting
+    }
+    push(m_notificationMap[nf].description, msg, m_notificationMap[nf].priority);
     return true;
 }
 
