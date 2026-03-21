@@ -115,6 +115,11 @@ namespace EN {
                             "ekosStatusChangedToSuccess", "ekosStatusChangedToError"
                         };
 
+                        std::vector<std::string> m_ekosSettleStatusNotificationMap = {
+                            "ekosSettleStatusChangedToIdle", "ekosSettleStatusChangedToPending",
+                            "ekosSettleStatusChangedToSuccess", "ekosSettleStatusChangedToError"
+                        };
+
                         std::unordered_map<std::string, std::string> m_logInterfaceNotificationMap = {
                             {"org.kde.kstars.Ekos", "ekosNewLog"}
                         };
@@ -131,11 +136,13 @@ namespace EN {
                         void processSignal(const SignalData &data);
                         bool onEkosStatusChanged(const SignalData &data);
                         bool onEkosNewDevice(const SignalData &data);
+                        bool onEkosSettleStatusChanged(const SignalData &data);
                         bool onNewLog(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
                             &FrmMain::onEkosNewDevice,
+                            &FrmMain::onEkosSettleStatusChanged,
                             &FrmMain::onNewLog
                         };
 	};

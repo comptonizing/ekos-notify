@@ -125,6 +125,21 @@ bool FrmMain::onEkosNewDevice(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onEkosSettleStatusChanged(const SignalData &data) {
+    if ( data.signal != "settleStatusChanged" || data.object != "/KStars/Ekos" || data.interface != "org.kde.kstars.Ekos" ) {
+        return false;
+    }
+    int status = extractStatus(data.parameters);
+    std::string nf = m_ekosSettleStatusNotificationMap[status];
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    push(m_notificationMap[nf].description,
+         m_notificationMap[nf].description,
+         m_notificationMap[nf].priority);
+    return true;
+}
+
 bool FrmMain::onNewLog(const SignalData &data) {
     if ( data.signal != "newLog" ) {
         return false;
