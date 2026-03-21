@@ -1,5 +1,4 @@
 #include "frame.h"
-#include <stdexcept>
 
 namespace EN {
 
@@ -35,6 +34,7 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
                 m_settingsWindow = std::move(win);
                 m_settingsWindow->signal_value_chagned().connect([&]() {
                         writeSettingsConfig();
+                        makeNotificationMap();
                         });
                 m_settingsWindow->show();
                 });
@@ -55,6 +55,13 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
 FrmMain::~FrmMain() {
 }
 
+int FrmMain::extractStatus(const Glib::VariantContainerBase &container) {
+    Glib::VariantBase inside;
+    container.get_child(inside, 0);
+    Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside).get_child(inside, 0);
+    return Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(inside).get();
+}
+
 void FrmMain::onSignal(
   const Glib::RefPtr<Gio::DBus::Connection>& connection,
   const Glib::ustring &sender_name,
@@ -64,7 +71,6 @@ void FrmMain::onSignal(
   const Glib::VariantContainerBase& parameters
 ) {
     std::ignore = connection;
-
 
     SignalData data = {sender_name, object_path, interface_name, signal_name, parameters};
     std::thread([&, data]() {
@@ -88,7 +94,18 @@ void FrmMain::processSignal(const SignalData &data) {
 }
 
 bool FrmMain::onEkosStatusChanged(const SignalData &data) {
-    return false;
+    if ( data.signal != "ekosStatusChanged" || data.object != "/KStars/Ekos" || data.interface != "org.kde.kstars.Ekos" ) {
+        return false;
+    }
+    int status = extractStatus(data.parameters);
+    std::string notification = m_ekosStatusNotificationMap[status];
+    if ( ! m_notificationMap[notification].enabled ) {
+        return true;
+    }
+    push(m_notificationMap[notification].description,
+         m_notificationMap[notification].description,
+         m_notificationMap[notification].priority);
+    return true;
 }
 
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
@@ -129,6 +146,18 @@ void FrmMain::log(const std::string &msg, bool showTimestamp) {
 	});
 	m_logDispatcher();
 	return;
+}
+
+void FrmMain::makeNotificationMap() {
+    m_notificationMap.clear();
+    for (size_t ii=0; ii<m_notificationIds.size(); ii++) {
+        std::string key = std::string(m_notificationIds[ii]);
+        m_notificationMap[key] = NotificationConfig{
+            m_notificationEnabled[ii],
+            m_notificationPriorities[ii],
+            m_notificationDescriptions[ii]
+        };
+    }
 }
 
 void FrmMain::initConfig() {
@@ -238,6 +267,7 @@ void FrmMain::initConfig() {
             m_notificationEnabled = m_defaultNotificationEnabled;
             writeSettingsConfig();
         }
+        makeNotificationMap();
 }
 
 bool FrmMain::readSettingsConfig() {
@@ -356,6 +386,8 @@ void FrmMain::push(std::string &title, std::string &msg, int priority) {
     json["title"] = title;
     json["priority"] = priority;
     json["extras"]["client::display"]["contentType"] = "text/markdown";
+
+    log(std::string("Notification: ") + title);
 
     char buffURL[256];
     snprintf(buffURL, sizeof(buffURL)-1, "/message?token=%s", m_entryToken->get_text().c_str());

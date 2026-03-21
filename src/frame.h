@@ -18,6 +18,7 @@
 #include <gtkmm/builder.h>
 #include <glibmm/fileutils.h>
 #include <exception>
+#include <unordered_map>
 
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
@@ -87,6 +88,14 @@ namespace EN {
                         std::vector<int> m_defaultNotificationPriorities;
                         std::vector<bool> m_defaultNotificationEnabled;
 
+                        struct NotificationConfig {
+                            bool enabled;
+                            int priority;
+                            std::string description;
+                        };
+
+                        std::unordered_map<std::string, NotificationConfig> m_notificationMap;
+
                         void onSignal(
                                         const Glib::RefPtr<Gio::DBus::Connection>& connection,
                                         const Glib::ustring &sender_name,
@@ -97,6 +106,14 @@ namespace EN {
                                 );
                         bool readSettingsConfig();
                         bool writeSettingsConfig();
+                        void makeNotificationMap();
+
+                        int extractStatus(const Glib::VariantContainerBase &container);
+
+                        std::vector<std::string> m_ekosStatusNotificationMap = {
+                            "ekosStatusChangedToIdle", "ekosStatusChangedToPending",
+                            "ekosStatusChangedToSuccess", "ekosStatusChangedToError"
+                        };
                         
                         struct SignalData {
                             const Glib::ustring sender;
