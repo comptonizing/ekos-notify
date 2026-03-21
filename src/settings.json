@@ -8,5 +8,6 @@
   ["ekosSettleStatusChangedToSuccess",	"Ekos settle status changed to success",	1,	false],
   ["ekosSettleStatusChangedToError",	"Ekos settle status changed to error",		10,	true],
   ["ekosNewDevice",			"New device connected to ekos",			1,	false],
-  ["ekosNewLog",			"New log in ekos",				1,	false]
+  ["ekosNewLog",			"New log in ekos",				1,	false],
+  ["alignNewLog",			"New log in align module",			1,	false]
 ]

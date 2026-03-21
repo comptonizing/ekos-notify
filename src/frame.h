@@ -121,7 +121,8 @@ namespace EN {
                         };
 
                         std::unordered_map<std::string, std::string> m_logInterfaceNotificationMap = {
-                            {"org.kde.kstars.Ekos", "ekosNewLog"}
+                            {"org.kde.kstars.Ekos", "ekosNewLog"},
+                            {"org.kde.kstars.Ekos.Align", "alignNewLog"}
                         };
                         
                         struct SignalData {
