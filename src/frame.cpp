@@ -57,10 +57,66 @@ FrmMain::~FrmMain() {
 }
 
 int FrmMain::extractStatus(const Glib::VariantContainerBase &container) {
+    const char* expected = "((i))";
+    if ( container.get_type_string() != expected ) {
+        std::string message = "Unknown status type on dbus, got \"" +
+            container.get_type_string() + ", expected " + expected;
+        throw std::runtime_error(message);
+    }
     Glib::VariantBase inside;
     container.get_child(inside, 0);
     Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside).get_child(inside, 0);
     return Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(inside).get();
+}
+
+void FrmMain::checkNf(const std::string &nf) {
+    if ( ! m_notificationMap.count(nf) ) {
+        std::string message = "Notification " + nf + " not defined";
+        throw std::runtime_error(message);
+    }
+}
+
+void FrmMain::checkContains(const std::vector<std::string> &vec, int index) {
+    if ( index < 0 || (size_t)index >= vec.size() ) {
+        throw std::runtime_error("Vector does not contain index");
+    }
+}
+
+void checkContains(const std::unordered_map<std::string, std::string> &map, std::string &key) {
+    if ( ! map.count(key) ) {
+        throw std::runtime_error("Map does not contain key");
+    }
+}
+
+void FrmMain::checkContains(const std::unordered_map<int, std::string> &map, int key) {
+    if ( ! map.count(key) ) {
+        throw std::runtime_error("Map does not contain key");
+    }
+}
+
+void FrmMain::checkDbusType(const Glib::VariantContainerBase &thing, const char* expected) {
+    auto type = thing.get_type_string();
+    if ( type != expected ) {
+        std::string msg = "Wrong type on dbus, expected ";
+        msg += expected;
+        msg += ", got " + type;
+        throw std::runtime_error(msg);
+    }
+}
+
+void FrmMain::checkDbusType(const SignalData &data, const char* expected) {
+    checkDbusType(data.parameters, expected);
+}
+
+std::string FrmMain::signalToMessage(const SignalData &data) {
+    std::string message;
+    message += "Signal: " + data.signal + "\n";
+    message += "From: " + data.sender + "\n";
+    message += "Object: " + data.object + "\n";
+    message += "Interface: " + data.interface + "\n";
+    message += "Type: " + data.parameters.get_type_string() + "\n";
+    message += "Values: " + data.parameters.print() + "\n";
+    return message;
 }
 
 void FrmMain::onSignal(
@@ -81,15 +137,32 @@ void FrmMain::onSignal(
 
 void FrmMain::processSignal(const SignalData &data) {
     std::lock_guard<std::mutex> lock(m_signalMutex);
-    std::cout << "Got signal" << std::endl;
-    std::cout << "From: " << data.sender << std::endl;
-    std::cout << "Object: " << data.object << std::endl;
-    std::cout << "Interface: " << data.interface << std::endl;
-    std::cout << "Signal: " << data.signal << std::endl;
-    std::cout << data.parameters.get_type_string() << " " << data.parameters.print() << std::endl << std::endl;
+    std::cout << "\n" << signalToMessage(data);
 
     for ( auto cb : m_dispatchTable ) {
-        if ( (this->*cb)(data) ) {
+        bool result = false;
+        try {
+            result = (this->*cb)(data);
+        } catch (const Glib::Error& e) {
+            char buff[128];
+            snprintf(buff, sizeof(buff)-1, "%d", e.code());
+            std::string message = "Serious error processing\n" +
+                signalToMessage(data) +
+                "What: " + e.what() + "\n" +
+                "Domain: " + e.domain() + "\n" +
+                "Code: " + buff + "\n\n";
+            log(message);
+        } catch (const std::exception& e) {
+            std::string message = "Serious error processing\n" +
+                signalToMessage(data) +
+                "What: " + e.what() + "\n\n";
+            log(message);
+        } catch (...) {
+            std::string message = "Serious error processing\n" +
+                signalToMessage(data) + "\n\n";
+            log(message);
+        }
+        if ( result ) {
             return;
         }
     }
@@ -103,6 +176,7 @@ std::string FrmMain::getDeviceName(const SignalData &data) {
     auto proxy = Gio::DBus::Proxy::create_sync(m_dbus, "org.kde.kstars",
             data.object, "org.freedesktop.DBus.Properties");
     auto result = proxy->call_sync("Get", args);
+    checkDbusType(result, "(v)");
     auto tuple = Glib::VariantContainerBase::cast_dynamic<Glib::VariantContainerBase>(result);
     Glib::VariantBase v_layer = tuple.get_child(0);
     auto v_container = Glib::VariantContainerBase::cast_dynamic<Glib::VariantContainerBase>(v_layer);
@@ -117,7 +191,9 @@ bool FrmMain::onEkosStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_ekosStatusNotificationMap, status);
     std::string nf = m_ekosStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -132,9 +208,11 @@ bool FrmMain::onEkosNewDevice(const SignalData &data) {
         return false;
     }
     std::string nf = "ekosNewDevice";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
+    checkDbusType(data, "(si)");
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     std::string device = Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(inside).get();
@@ -149,7 +227,9 @@ bool FrmMain::onEkosSettleStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_ekosSettleStatusNotificationMap, status);
     std::string nf = m_ekosSettleStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -168,6 +248,7 @@ bool FrmMain::onNewLog(const SignalData &data) {
         return true;
     }
     std::string nf = m_logInterfaceNotificationMap[data.interface];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -183,9 +264,11 @@ bool FrmMain::onAlignNewSolution(const SignalData &data) {
         return false;
     }
     std::string nf = "alignNewSolution";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
+    checkDbusType(data, "(a{sv})");
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
@@ -207,7 +290,9 @@ bool FrmMain::onAlignStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_alignStatusNotificationMap, status);
     std::string nf = m_alignStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -222,9 +307,11 @@ bool FrmMain::onCaptureComplete(const SignalData &data) {
         return false;
     }
     std::string nf = "captureCaptureComplete";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return false;
     }
+    checkDbusType(data, "(a{sv}s)");
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
@@ -275,6 +362,7 @@ bool FrmMain::onCaptureMeridianFlipStarted(const SignalData &data) {
         return false;
     }
     std::string nf = "captureMeridianFlipStarted";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -287,6 +375,7 @@ bool FrmMain::onCaptureReady(const SignalData &data) {
         return false;
     }
     std::string nf = "captureReady";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -299,10 +388,14 @@ bool FrmMain::onFocusNewHFR(const SignalData &data) {
         return false;
     }
     std::string nf = "focusNewHFR";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled) {
         return true;
     }
-
+    checkDbusType(data, "(dibs)");
+    if ( data.parameters.get_n_children() < 4 ) {
+        throw std::runtime_error("Not enough children in dbus reply");
+    }
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     double hfr = Glib::VariantBase::cast_dynamic<Glib::Variant<double>>(inside).get();
@@ -329,12 +422,15 @@ bool FrmMain::onFocusStatusChanged(const SignalData &data) {
     if ( data.signal != "newStatus" || data.object != "/KStars/Ekos/Focus" || data.interface != "org.kde.kstars.Ekos.Focus" ) {
         return false;
     }
+    checkDbusType(data, "((i)s)");
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside).get_child(inside, 0);
     int status= Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(inside).get();
 
+    checkContains(m_focusStatusNotificationMap, status);
     std::string nf = m_focusStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -353,7 +449,9 @@ bool FrmMain::onGuideStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_guideStatusNotificationMap, status);
     std::string nf = m_guideStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -368,6 +466,7 @@ bool FrmMain::onMountNewMeridianFlipSetup(const SignalData &data) {
         return false;
     }
     std::string nf = "mountNewMeridianFlipSetup";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -382,7 +481,9 @@ bool FrmMain::onMountParkStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_mountParkStatusNotificationMap, status);
     std::string nf = m_mountParkStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -397,7 +498,9 @@ bool FrmMain::onMountStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_mountStatusNotificationMap, status);
     std::string nf = m_mountStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -412,7 +515,9 @@ bool FrmMain::onMountPierSideChanged(const SignalData &data ){
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_mountPierSideNotificationMap, status);
     std::string nf = m_mountPierSideNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -427,6 +532,7 @@ bool FrmMain::onMountReady(const SignalData &data) {
         return false;
     }
     std::string nf = "mountReady";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -441,7 +547,9 @@ bool FrmMain::onObservatoryStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_observatoryStatusNotificationMap, status);
     std::string nf = m_observatoryStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -456,7 +564,9 @@ bool FrmMain::onSchedulerStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_schedulerStatusNotificationMap, status);
     std::string nf = m_schedulerStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -471,6 +581,7 @@ bool FrmMain::onDeviceConnected(const SignalData &data) {
         return false;
     }
     std::string nf = "deviceConnected";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -485,6 +596,7 @@ bool FrmMain::onDeviceDisconnected(const SignalData &data) {
         return false;
     }
     std::string nf = "deviceDisconnected";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -499,7 +611,9 @@ bool FrmMain::onDomeParkStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_domeParkStatusNotificationMap, status);
     std::string nf = m_domeParkStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -514,7 +628,9 @@ bool FrmMain::onDomeShutterStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_domeShutterStatusNotificationMap, status);
     std::string nf = m_domeShutterStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -529,7 +645,9 @@ bool FrmMain::onDomeStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_domeStatusNotificationMap, status);
     std::string nf = m_domeStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -544,9 +662,11 @@ bool FrmMain::onDomePositionChanged(const SignalData &data) {
         return false;
     }
     std::string nf = "domePositionChanged";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
+    checkDbusType(data, "(d)");
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     double position = Glib::VariantBase::cast_dynamic<Glib::Variant<double>>(inside).get();
@@ -562,6 +682,7 @@ bool FrmMain::onDomeReady(const SignalData &data) {
         return false;
     }
     std::string nf = "domeReady";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -574,7 +695,9 @@ bool FrmMain::onDustcapParkStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_dustcapParkStatusNotificationMap, status);
     std::string nf = m_dustcapParkStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -589,7 +712,9 @@ bool FrmMain::onDustcapStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_dustcapStatusNotificationMap, status);
     std::string nf = m_dustcapStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -604,6 +729,7 @@ bool FrmMain::onDustcapReady(const SignalData &data) {
         return false;
     }
     std::string nf = "dustcapReady";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -618,7 +744,9 @@ bool FrmMain::onWeatherStatusChanged(const SignalData &data) {
         return false;
     }
     int status = extractStatus(data.parameters);
+    checkContains(m_weatherStatusNotificationMap, status);
     std::string nf = m_weatherStatusNotificationMap[status];
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }
@@ -633,6 +761,7 @@ bool FrmMain::onWeatherReady(const SignalData &data) {
         return false;
     }
     std::string nf = "weatherReady";
+    checkNf(nf);
     if ( ! m_notificationMap[nf].enabled ) {
         return true;
     }

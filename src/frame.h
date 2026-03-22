@@ -108,7 +108,6 @@ namespace EN {
                         bool writeSettingsConfig();
                         void makeNotificationMap();
 
-                        int extractStatus(const Glib::VariantContainerBase &container);
 
                         std::vector<std::string> m_ekosStatusNotificationMap = {
                             "ekosStatusChangedToIdle", "ekosStatusChangedToPending",
@@ -236,6 +235,14 @@ namespace EN {
                             const Glib::VariantContainerBase parameters;
                         };
                         std::string getDeviceName(const SignalData &data);
+                        std::string signalToMessage(const SignalData &data);
+                        void checkDbusType(const Glib::VariantContainerBase &thing, const char* expected);
+                        void checkDbusType(const SignalData &data, const char *expected);
+                        void checkNf(const std::string &nf);
+                        void checkContains(const std::vector<std::string> &vec, int index);
+                        void checkContains(const std::unordered_map<std::string, std::string> &map, const std::string &key);
+                        void checkContains(const std::unordered_map<int, std::string> &map, int key);
+                        int extractStatus(const Glib::VariantContainerBase &container);
 
                         // Actual processing of signals
                         void processSignal(const SignalData &data);
