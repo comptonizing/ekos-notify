@@ -569,6 +569,21 @@ bool FrmMain::onDomeReady(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onDustcapParkStatusChanged(const SignalData &data) {
+    if ( data.signal != "newParkStatus" || data.object.rfind("/KStars/INDI/DustCap/", 0) != 0 || data.interface != "org.kde.kstars.INDI.DustCap" ) {
+        return false;
+    }
+    int status = extractStatus(data.parameters);
+    std::string nf = m_dustcapParkStatusNotificationMap[status];
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    push(m_notificationMap[nf].description,
+         m_notificationMap[nf].description,
+         m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));
