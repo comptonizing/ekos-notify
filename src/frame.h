@@ -217,6 +217,12 @@ namespace EN {
                             "dustcapParkStatusChangedToUnparked", "dustcapParkStatusChangedToError"
                         };
 
+                        std::vector<std::string> m_dustcapStatusNotificationMap = {
+                            "dustcapStatusChangedToIdle", "dustcapStatusChangedToParking",
+                            "dustcapStatusChangedToUnparking", "dustcapStatusChangedToParked",
+                            "dustcapStatusChangedToError", "dustcapStatusChangedToUnknown"
+                        };
+
                         struct SignalData {
                             const Glib::ustring sender;
                             const Glib::ustring object;
@@ -255,6 +261,7 @@ namespace EN {
                         bool onDomePositionChanged(const SignalData &data);
                         bool onDomeReady(const SignalData &data);
                         bool onDustcapParkStatusChanged(const SignalData &data);
+                        bool onDustcapStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -283,7 +290,8 @@ namespace EN {
                             &FrmMain::onDomeStatusChanged,
                             &FrmMain::onDomePositionChanged,
                             &FrmMain::onDomeReady,
-                            &FrmMain::onDustcapParkStatusChanged
+                            &FrmMain::onDustcapParkStatusChanged,
+                            &FrmMain::onDustcapStatusChanged
                         };
 	};
 }

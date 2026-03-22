@@ -115,5 +115,11 @@
   ["dustcapParkStatusChangedToParking",		"Dustcap park status changed to parking",		1,	false],
   ["dustcapParkStatusChangedToUnparking",	"Dustcap park status changed to unparking",		1,	false],
   ["dustcapParkStatusChangedToUnparked",	"Dustcap park status changed to unparked",		3,	true],
-  ["dustcapParkStatusChangedToError",		"Dustcap park status changed to error",			10,	true]
+  ["dustcapParkStatusChangedToError",		"Dustcap park status changed to error",			10,	true],
+  ["dustcapStatusChangedToIdle",		"Dustcap status changed to idle",			1,	false],
+  ["dustcapStatusChangedToParking",		"Dustcap status changed to parking",			1,	false],
+  ["dustcapStatusChangedToUnparking",		"Dustcap status changed to unparking",			1,	false],
+  ["dustcapStatusChangedToParked",		"Dustcap status changed to parked",			1,	false],
+  ["dustcapStatusChangedToError",		"Dustcap status changed to error",			10,	true],
+  ["dustcapStatusChangedToUnknown",		"Dustcap status changed to unknown",			1,	false]
 ]
