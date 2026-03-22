@@ -273,6 +273,37 @@ bool FrmMain::onCaptureReady(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onFocusNewHFR(const SignalData &data) {
+    if ( data.signal != "newHFR" || data.object != "/KStars/Ekos/Focus" || data.interface != "org.kde.kstars.Ekos.Focus" ) {
+        return false;
+    }
+    std::string nf = "focusNewHFR";
+    if ( ! m_notificationMap[nf].enabled) {
+        return true;
+    }
+
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    double hfr = Glib::VariantBase::cast_dynamic<Glib::Variant<double>>(inside).get();
+    data.parameters.get_child(inside, 1);
+    int position = Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(inside).get();
+    data.parameters.get_child(inside, 2);
+    bool autofocus = Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(inside).get();
+    data.parameters.get_child(inside, 3);
+    std::string train = Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(inside).get();
+
+    char buff[128];
+    std::string msg = "";
+    snprintf(buff, sizeof(buff)-1, "HFR: %.2f\n\n", hfr);
+    msg += buff;
+    snprintf(buff, sizeof(buff)-1, "Position: %d\n\n", position);
+    msg += buff;
+    msg += std::string("Autofocus: ") + (autofocus ? "enabled" : "disabled") + "\n\n";
+    msg += "Train: " + train + "\n\n";
+    push(m_notificationMap[nf].description, msg, m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));

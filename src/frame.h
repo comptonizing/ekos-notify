@@ -157,6 +157,7 @@ namespace EN {
                         bool onCaptureComplete(const SignalData &data);
                         bool onCaptureMeridianFlipStarted(const SignalData &data);
                         bool onCaptureReady(const SignalData &data);
+                        bool onFocusNewHFR(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -167,7 +168,8 @@ namespace EN {
                             &FrmMain::onAlignStatusChanged,
                             &FrmMain::onCaptureComplete,
                             &FrmMain::onCaptureMeridianFlipStarted,
-                            &FrmMain::onCaptureReady
+                            &FrmMain::onCaptureReady,
+                            &FrmMain::onFocusNewHFR
                         };
 	};
 }
