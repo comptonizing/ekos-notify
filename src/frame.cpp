@@ -207,7 +207,7 @@ bool FrmMain::onCaptureComplete(const SignalData &data) {
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
-    std::string msg = "";
+    std::unordered_map<std::string, std::string> stuff;
     for (gsize ii=0; ii<content.get_n_children(); ii++) {
         auto thing = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(content.get_child(ii));
         Glib::VariantBase child;
@@ -221,8 +221,24 @@ bool FrmMain::onCaptureComplete(const SignalData &data) {
                 return true;
             }
         }
-        msg += name + ": " + value.print() + "\n\n"; // Double newline required for message formatting
+        if ( name == "type" ) {
+            stuff[name] = m_frameNameMap[Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(value).get()];
+            continue;
+        }
+        stuff[name] = value.print();
     }
+
+    std::string msg = "";
+    msg += "Type: " + stuff["type"] + "\n\n";
+    msg += "Filter: " + stuff["filter"] + "\n\n";
+    msg += "Exposure: " + stuff["exposure"] + "s\n\n";
+    msg += "HFR: " + stuff["hfr"] + "\n\n";
+    msg += "Median: " + stuff["median"] + "\n\n";
+    msg += "Star count: " + stuff["starCount"] + "\n\n";
+    msg += "Eccentricity: " + stuff["eccentricity"] + "\n\n";
+    msg += "Binning: " + stuff["binx"] + "x" + stuff["biny"] + "\n\n";
+    msg += "Dimensions: " + stuff["width"] + "x" + stuff["height"] + "\n\n";
+    msg += "File: " + stuff["filename"] + "\n\n";
     push(m_notificationMap[nf].description, msg, m_notificationMap[nf].priority);
     return true;
 }

@@ -132,6 +132,10 @@ namespace EN {
                             "alignStatusChangedToSyncing", "alignStatusChangedToSlewing",
                             "alignStatusChangedToRotating", "alignStatusChangedToSuspended"
                         };
+
+                        std::vector<std::string> m_frameNameMap = {
+                            "Light", "Bias", "Dark", "Flat", "Video", "None"
+                        };
                         
                         struct SignalData {
                             const Glib::ustring sender;
