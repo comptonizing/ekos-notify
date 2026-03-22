@@ -122,7 +122,8 @@ namespace EN {
 
                         std::unordered_map<std::string, std::string> m_logInterfaceNotificationMap = {
                             {"org.kde.kstars.Ekos", "ekosNewLog"},
-                            {"org.kde.kstars.Ekos.Align", "alignNewLog"}
+                            {"org.kde.kstars.Ekos.Align", "alignNewLog"},
+                            {"org.kde.kstars.Ekos.Capture", "captureNewLog"},
                         };
 
                         std::vector<std::string> m_alignStatusNotificationMap = {
