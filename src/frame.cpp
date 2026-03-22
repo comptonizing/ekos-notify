@@ -539,6 +539,24 @@ bool FrmMain::onDomeStatusChanged(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onDomePositionChanged(const SignalData &data) {
+    if ( data.signal != "positionChanged" || data.object.rfind("/KStars/INDI/Dome/", 0) != 0 || data.interface != "org.kde.kstars.INDI.Dome" ) {
+        return false;
+    }
+    std::string nf = "domePositionChanged";
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    double position = Glib::VariantBase::cast_dynamic<Glib::Variant<double>>(inside).get();
+    char buff[256];
+    snprintf(buff, sizeof(buff)-1, "Dome position changed to %.1f", position);
+    std::string msg = buff;
+    push(m_notificationMap[nf].description, msg, m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));
