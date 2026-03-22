@@ -93,5 +93,11 @@
   ["domeParkStatusChangedToParking",		"Dome park status changed to parking",		1,	false],
   ["domeParkStatusChangedToUnparking",		"Dome park status changed to unparking",	1,	false],
   ["domeParkStatusChangedToUnparked",		"Dome park status changed to unparked",		3,	true],
-  ["domeParkStatusChangedToError",		"Dome park status changed to error",		10,	true]
+  ["domeParkStatusChangedToError",		"Dome park status changed to error",		10,	true],
+  ["domeShutterStatusChangedToUnknown",		"Dome shutter status changed to unknown",	1,	false],
+  ["domeShutterStatusChangedToOpen",		"Dome shutter status changed to open",		5,	true],
+  ["domeShutterStatusChangedToClosed",		"Dome shutter status changed to closed",	5,	true],
+  ["domeShutterStatusChangedToOpening",		"Dome shutter status changed to opening",	1,	false],
+  ["domeShutterStatusChangedToClosing",		"Dome shutter status changed to closing",	1,	false],
+  ["domeShutterStatusChangedToError",		"Dome shutter status changed to error",		10,	true]
 ]
