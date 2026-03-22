@@ -192,6 +192,7 @@ namespace EN {
                             const Glib::ustring signal;
                             const Glib::VariantContainerBase parameters;
                         };
+                        std::string getDeviceName(const SignalData &data);
 
                         // Actual processing of signals
                         void processSignal(const SignalData &data);

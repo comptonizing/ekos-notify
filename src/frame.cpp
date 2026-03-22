@@ -94,6 +94,23 @@ void FrmMain::processSignal(const SignalData &data) {
     }
 }
 
+std::string FrmMain::getDeviceName(const SignalData &data) {
+    Glib::VariantContainerBase args = Glib::VariantContainerBase::create_tuple({
+            Glib::Variant<Glib::ustring>::create(data.interface),
+            Glib::Variant<Glib::ustring>::create("name")
+            });
+    auto proxy = Gio::DBus::Proxy::create_sync(m_dbus, "org.kde.kstars",
+            data.object, "org.freedesktop.DBus.Properties");
+    auto result = proxy->call_sync("Get", args);
+    auto tuple = Glib::VariantContainerBase::cast_dynamic<Glib::VariantContainerBase>(result);
+    Glib::VariantBase v_layer = tuple.get_child(0);
+    auto v_container = Glib::VariantContainerBase::cast_dynamic<Glib::VariantContainerBase>(v_layer);
+    Glib::VariantBase s_layer = v_container.get_child();
+    auto string_variant = Glib::Variant<Glib::ustring>::cast_dynamic<Glib::Variant<Glib::ustring>>(s_layer);
+    std::string device = string_variant.get();
+    return device;
+}
+
 bool FrmMain::onEkosStatusChanged(const SignalData &data) {
     if ( data.signal != "ekosStatusChanged" || data.object != "/KStars/Ekos" || data.interface != "org.kde.kstars.Ekos" ) {
         return false;
