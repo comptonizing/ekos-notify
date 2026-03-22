@@ -108,5 +108,6 @@
   ["domeStatusChangedToUnparking",		"Dome status changed to unparking",			1,	false],
   ["domeStatusChangedToParked",			"Dome status changed to parked",			3,	true],
   ["domeStatusChangedToError",			"Dome status changed to error",				10,	true],
-  ["domePositionChanged",			"Dome position changed",				1,	false]
+  ["domePositionChanged",			"Dome position changed",				1,	false],
+  ["domeReady",					"Dome ready",						1,	false]
 ]

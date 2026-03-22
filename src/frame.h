@@ -247,6 +247,7 @@ namespace EN {
                         bool onDomeShutterStatusChanged(const SignalData &data);
                         bool onDomeStatusChanged(const SignalData &data);
                         bool onDomePositionChanged(const SignalData &data);
+                        bool onDomeReady(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -273,7 +274,8 @@ namespace EN {
                             &FrmMain::onDomeParkStatusChanged,
                             &FrmMain::onDomeShutterStatusChanged,
                             &FrmMain::onDomeStatusChanged,
-                            &FrmMain::onDomePositionChanged
+                            &FrmMain::onDomePositionChanged,
+                            &FrmMain::onDomeReady
                         };
 	};
 }
