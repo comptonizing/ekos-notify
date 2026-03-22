@@ -56,5 +56,11 @@
   ["guideStatusChangedToDitheringError",	"Guide status changed to dithering error",	1,	false],
   ["guideStatusChangedToDitheringSuccess",	"Guide status changed to dithering success",	1,	false],
   ["guideStatusChangedToDitheringSettle",	"Guide status changed to dithering settle",	1,	false],
-  ["mountNewMeridianFlipSetup",			"New meridian flip setup",			1,	false]
+  ["mountNewMeridianFlipSetup",			"New meridian flip setup",			1,	false],
+  ["mountParkStatusChangedToUnknown",		"Mount park status changed to unknown",		1,	false],
+  ["mountParkStatusChangedToParked",		"Mount park status changed to parked",		3,	true],
+  ["mountParkStatusChangedToParking",		"Mount park status changed to parking",		1,	false],
+  ["mountParkStatusChangedToUnparking",		"Mount park status changed to unparking",	1,	false],
+  ["mountParkStatusChangedToUnparked",		"Mount park status changed to unparked",	3,	true],
+  ["mountParkStatusChangedToError",		"Mount park status changed to error",		10,	true]
 ]

@@ -356,6 +356,21 @@ bool FrmMain::onMountNewMeridianFlipSetup(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onMountParkStatusChanged(const SignalData &data) {
+    if ( data.signal != "newParkStatus" || data.object != "/KStars/Ekos/Mount" || data.interface != "org.kde.kstars.Ekos.Mount" ) {
+        return false;
+    }
+    int status = extractStatus(data.parameters);
+    std::string nf = m_mountParkStatusNotificationMap[status];
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    push(m_notificationMap[nf].description,
+         m_notificationMap[nf].description,
+         m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));
