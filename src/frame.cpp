@@ -30,8 +30,9 @@ FrmMain::FrmMain(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refG
                         m_notificationPriorities,
                         m_notificationEnabled
                         );
-                win->set_title("Notification settings");
                 m_settingsWindow = std::move(win);
+                m_settingsWindow->set_title("Notification settings");
+                m_settingsWindow->set_default_geometry(500,700);
                 m_settingsWindow->signal_value_chagned().connect([&]() {
                         writeSettingsConfig();
                         makeNotificationMap();
