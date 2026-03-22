@@ -401,6 +401,20 @@ bool FrmMain::onMountPierSideChanged(const SignalData &data ){
     return true;
 }
 
+bool FrmMain::onMountReady(const SignalData &data) {
+    if ( data.signal != "ready" || data.object != "/KStars/Ekos/Mount" || data.interface != "org.kde.kstars.Ekos.Mount" ) {
+        return false;
+    }
+    std::string nf = "mountReady";
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    push(m_notificationMap[nf].description,
+         m_notificationMap[nf].description,
+         m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));

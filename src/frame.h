@@ -205,6 +205,7 @@ namespace EN {
                         bool onMountParkStatusChanged(const SignalData &data);
                         bool onMountStatusChanged(const SignalData &data);
                         bool onMountPierSideChanged(const SignalData &data);
+                        bool onMountReady(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -222,7 +223,8 @@ namespace EN {
                             &FrmMain::onMountNewMeridianFlipSetup,
                             &FrmMain::onMountParkStatusChanged,
                             &FrmMain::onMountStatusChanged,
-                            &FrmMain::onMountPierSideChanged
+                            &FrmMain::onMountPierSideChanged,
+                            &FrmMain::onMountReady
                         };
 	};
 }
