@@ -146,6 +146,19 @@ namespace EN {
                             "focusStatusChangedToWaiting", "focusStatusChangedToProgress",
                             "focusStatusChangedToFraming", "focusStatusChangedToFilter"
                         };
+
+                        std::vector<std::string> m_guideStatusNotificationMap = {
+                            "guideStatusChangedToIdle", "guideStatusChangedToAborted",
+                            "guideStatusChangedToConnected", "guideStatusChangedToDisconnected",
+                            "guideStatusChangedToCapture", "guideStatusChangedToLooping",
+                            "guideStatusChangedToDark", "guideStatusChangedToSubframe",
+                            "guideStatusChangedToStarselect", "guideStatusChangedToCalibrate",
+                            "guideStatusChangedToCalibrationError", "guideStatusChangedToCalibrationSuccess",
+                            "guideStatusChangedToGuiding", "guideStatusChangedToSuspended",
+                            "guideStatusChangedToReacquiring", "guideStatusChangedToDithering",
+                            "guideStatusChangedToManualDithering", "guideStatusChangedToDitheringError",
+                            "guideStatusChangedToDitheringSuccess", "guideStatusChangedToDitheringSettle"
+                        };
                         
                         struct SignalData {
                             const Glib::ustring sender;
@@ -168,6 +181,7 @@ namespace EN {
                         bool onCaptureReady(const SignalData &data);
                         bool onFocusNewHFR(const SignalData &data);
                         bool onFocusStatusChanged(const SignalData &data);
+                        bool onGuideStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -180,7 +194,8 @@ namespace EN {
                             &FrmMain::onCaptureMeridianFlipStarted,
                             &FrmMain::onCaptureReady,
                             &FrmMain::onFocusNewHFR,
-                            &FrmMain::onFocusStatusChanged
+                            &FrmMain::onFocusStatusChanged,
+                            &FrmMain::onGuideStatusChanged
                         };
 	};
 }
