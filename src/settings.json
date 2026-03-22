@@ -55,5 +55,6 @@
   ["guideStatusChangedToManualDithering",	"Guide status changed to manual dithering",	1,	false],
   ["guideStatusChangedToDitheringError",	"Guide status changed to dithering error",	1,	false],
   ["guideStatusChangedToDitheringSuccess",	"Guide status changed to dithering success",	1,	false],
-  ["guideStatusChangedToDitheringSettle",	"Guide status changed to dithering settle",	1,	false]
+  ["guideStatusChangedToDitheringSettle",	"Guide status changed to dithering settle",	1,	false],
+  ["mountNewMeridianFlipSetup",			"New meridian flip setup",			1,	false]
 ]
