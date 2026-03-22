@@ -126,5 +126,6 @@
   ["weatherStatusChangedToIdle",		"Weather status changed to idle",			1,	false],
   ["weatherStatusChangedToOK",			"Weather status changed to OK",				3,	true],
   ["weatherStatusChangedToWarning",		"Weather status changed to warning",			5,	true],
-  ["weatherStatusChangedToAlert",		"Weather status changed to alert",			10,	true]
+  ["weatherStatusChangedToAlert",		"Weather status changed to alert",			10,	true],
+  ["weatherReady",				"Weather ready",					1,	false]
 ]
