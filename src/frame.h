@@ -156,6 +156,7 @@ namespace EN {
                         bool onAlignStatusChanged(const SignalData &data);
                         bool onCaptureComplete(const SignalData &data);
                         bool onCaptureMeridianFlipStarted(const SignalData &data);
+                        bool onCaptureReady(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -165,7 +166,8 @@ namespace EN {
                             &FrmMain::onAlignNewSolution,
                             &FrmMain::onAlignStatusChanged,
                             &FrmMain::onCaptureComplete,
-                            &FrmMain::onCaptureMeridianFlipStarted
+                            &FrmMain::onCaptureMeridianFlipStarted,
+                            &FrmMain::onCaptureReady
                         };
 	};
 }

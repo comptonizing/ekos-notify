@@ -23,5 +23,6 @@
   ["alignStatusChangedToRotating",	"Align status changed to rotating",		1,	false],
   ["alignStatusChangedToSuspended",	"Align status changed to suspended",		1,	false],
   ["captureCaptureComplete",		"Ekos completed an exposure",			3,	true],
-  ["captureMeridianFlipStarted",	"Ekos started meridian flip",			3,	true]
+  ["captureMeridianFlipStarted",	"Ekos started meridian flip",			3,	true],
+  ["captureReady",			"Ekos capture module ready",			1,	false]
 ]
