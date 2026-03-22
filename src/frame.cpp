@@ -304,6 +304,29 @@ bool FrmMain::onFocusNewHFR(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onFocusStatusChanged(const SignalData &data) {
+    if ( data.signal != "newStatus" || data.object != "/KStars/Ekos/Focus" || data.interface != "org.kde.kstars.Ekos.Focus" ) {
+        return false;
+    }
+    Glib::VariantBase inside;
+    data.parameters.get_child(inside, 0);
+    Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside).get_child(inside, 0);
+    int status= Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(inside).get();
+
+    std::string nf = m_focusStatusNotificationMap[status];
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+
+    data.parameters.get_child(inside, 1);
+    std::string train = Glib::VariantBase::cast_dynamic<Glib::Variant<std::string>>(inside).get();
+
+    std::string title = m_notificationMap[nf].description;
+    std::string message = "Train: " + train;
+    push(title, message, m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));

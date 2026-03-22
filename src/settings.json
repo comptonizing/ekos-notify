@@ -26,5 +26,13 @@
   ["captureCaptureComplete",		"Ekos completed an exposure",			3,	true],
   ["captureMeridianFlipStarted",	"Ekos started meridian flip",			3,	true],
   ["captureReady",			"Ekos capture module ready",			1,	false],
-  ["focusNewHFR",			"New HFR value in focus module",		1,	false]
+  ["focusNewHFR",			"New HFR value in focus module",		1,	false],
+  ["focusStatusChangedToIdle",		"Focus status changed to idle",			1,	false],
+  ["focusStatusChangedToComplete",	"Focus status changed to complete",		1,	false],
+  ["focusStatusChangedToFailed",	"Focus status changed to failed",		1,	false],
+  ["focusStatusChangedToAborted",	"Focus status changed to aborted",		1,	false],
+  ["focusStatusChangedToWaiting",	"Focus status changed to waiting",		1,	false],
+  ["focusStatusChangedToProgress",	"Focus status changed to progress",		1,	false],
+  ["focusStatusChangedToFraming",	"Focus status changed to framing",		1,	false],
+  ["focusStatusChangedToFilter",	"Focus status changed to changing filter",	1,	false]
 ]

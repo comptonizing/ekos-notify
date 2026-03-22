@@ -138,6 +138,13 @@ namespace EN {
                         std::vector<std::string> m_frameNameMap = {
                             "Light", "Bias", "Dark", "Flat", "Video", "None"
                         };
+
+                        std::vector<std::string> m_focusStatusNotificationMap = {
+                            "focusStatusChangedToIdle", "focusStatusChangedToComplete",
+                            "focusStatusChangedToFailed", "focusStatusChangedToAborted",
+                            "focusStatusChangedToWaiting", "focusStatusChangedToProgress",
+                            "focusStatusChangedToFraming", "focusStatusChangedToFilter"
+                        };
                         
                         struct SignalData {
                             const Glib::ustring sender;
@@ -159,6 +166,7 @@ namespace EN {
                         bool onCaptureMeridianFlipStarted(const SignalData &data);
                         bool onCaptureReady(const SignalData &data);
                         bool onFocusNewHFR(const SignalData &data);
+                        bool onFocusStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -170,7 +178,8 @@ namespace EN {
                             &FrmMain::onCaptureComplete,
                             &FrmMain::onCaptureMeridianFlipStarted,
                             &FrmMain::onCaptureReady,
-                            &FrmMain::onFocusNewHFR
+                            &FrmMain::onFocusNewHFR,
+                            &FrmMain::onFocusStatusChanged
                         };
 	};
 }
