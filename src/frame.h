@@ -166,6 +166,13 @@ namespace EN {
                             "mountParkStatusChangedToUnparked", "mountParkStatusChangedToError"
                         };
 
+                        std::vector<std::string> m_mountStatusNotificationMap = {
+                            "mountStatusChangedToIdle", "mountStatusChangedToMoving",
+                            "mountStatusChangedToSlewing", "mountStatusChangedToTracking",
+                            "mountStatusChangedToParking", "mountStatusChangedToParked",
+                            "mountStatusChangedToError"
+                        };
+
                         struct SignalData {
                             const Glib::ustring sender;
                             const Glib::ustring object;
@@ -190,6 +197,7 @@ namespace EN {
                         bool onGuideStatusChanged(const SignalData &data);
                         bool onMountNewMeridianFlipSetup(const SignalData &data);
                         bool onMountParkStatusChanged(const SignalData &data);
+                        bool onMountStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -205,7 +213,8 @@ namespace EN {
                             &FrmMain::onFocusStatusChanged,
                             &FrmMain::onGuideStatusChanged,
                             &FrmMain::onMountNewMeridianFlipSetup,
-                            &FrmMain::onMountParkStatusChanged
+                            &FrmMain::onMountParkStatusChanged,
+                            &FrmMain::onMountStatusChanged
                         };
 	};
 }
