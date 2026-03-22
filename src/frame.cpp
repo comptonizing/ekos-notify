@@ -539,6 +539,7 @@ bool FrmMain::readSettingsConfig() {
 }
 
 bool FrmMain::writeSettingsConfig() {
+    std::lock_guard<std::mutex> lock(m_settingsWriteMutex);
     std::ofstream out(m_settingsFile);
     if ( ! out.is_open() ) {
         log(std::string("Could not write to settings file ") + m_settingsFile + "\n");

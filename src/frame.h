@@ -74,7 +74,7 @@ namespace EN {
                         Gtk::Entry *m_entryURL, *m_entryToken;
 
                         std::string m_settingsFile, m_credentialsFile;
-			std::mutex m_logMutex, m_signalMutex;
+			std::mutex m_logMutex, m_signalMutex, m_settingsWriteMutex;
 
                         std::unique_ptr<NotificationSettingsWindow> m_settingsWindow = nullptr;
 
