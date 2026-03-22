@@ -1090,6 +1090,7 @@ NotificationSettingsWindow::NotificationSettingsWindow(std::vector<Glib::ustring
         Gtk::Label* label = Gtk::make_managed<Gtk::Label>(labels[ii]);
         label->set_xalign(0.0);
         label->set_hexpand(true);
+        label->set_margin_left(5);
         m_grid.attach(*label, 0, ii, 1, 1);
         auto adjustment = Gtk::Adjustment::create(1, 1, 10, 1);
         Gtk::SpinButton* spin = Gtk::make_managed<Gtk::SpinButton>(adjustment, 1.0, 0);
@@ -1103,6 +1104,7 @@ NotificationSettingsWindow::NotificationSettingsWindow(std::vector<Glib::ustring
         Gtk::Switch* sw = Gtk::make_managed<Gtk::Switch>();
         sw->set_active(enabled[ii]);
         sw->set_hexpand(true);
+        sw->set_margin_right(5);
         sw->property_state().signal_changed().connect([this, sw, ii, &enabled](){
                 enabled[ii] = sw->get_active();
                 m_signal_value_changed.emit();
