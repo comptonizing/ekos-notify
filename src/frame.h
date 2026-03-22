@@ -125,7 +125,8 @@ namespace EN {
                             {"org.kde.kstars.Ekos.Align", "alignNewLog"},
                             {"org.kde.kstars.Ekos.Capture", "captureNewLog"},
                             {"org.kde.kstars.Ekos.Focus", "focusNewLog"},
-                            {"org.kde.kstars.Ekos.Guide", "guideNewLog"}
+                            {"org.kde.kstars.Ekos.Guide", "guideNewLog"},
+                            {"org.kde.kstars.Ekos.Scheduler", "schedulerNewLog"}
                         };
 
                         std::vector<std::string> m_alignStatusNotificationMap = {

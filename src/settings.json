@@ -13,6 +13,7 @@
   ["captureNewLog",				"New log in capture module",			1,	false],
   ["focusNewLog",				"New log in focus module",			1,	false],
   ["guideNewLog",				"New log in guiding module",			1,	false],
+  ["schedulerNewLog",				"New log in scheduler module",			1,	false],
   ["alignNewSolution",				"New solution in align module",			1,	false],
   ["alignStatusChangedToIdle",			"Align status changed to idle",			1,	false],
   ["alignStatusChangedToCompleted",		"Align status changed to completed",		1,	false],
