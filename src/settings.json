@@ -121,5 +121,6 @@
   ["dustcapStatusChangedToUnparking",		"Dustcap status changed to unparking",			1,	false],
   ["dustcapStatusChangedToParked",		"Dustcap status changed to parked",			1,	false],
   ["dustcapStatusChangedToError",		"Dustcap status changed to error",			10,	true],
-  ["dustcapStatusChangedToUnknown",		"Dustcap status changed to unknown",			1,	false]
+  ["dustcapStatusChangedToUnknown",		"Dustcap status changed to unknown",			1,	false],
+  ["dustcapReady",				"Dustcap ready",					1,	false]
 ]
