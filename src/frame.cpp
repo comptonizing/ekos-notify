@@ -221,6 +221,9 @@ bool FrmMain::onCaptureComplete(const SignalData &data) {
         return false;
     }
     std::string nf = "captureCaptureComplete";
+    if ( ! m_notificationMap[nf].enabled ) {
+        return false;
+    }
     Glib::VariantBase inside;
     data.parameters.get_child(inside, 0);
     auto content = Glib::VariantBase::cast_dynamic<Glib::VariantContainerBase>(inside);
