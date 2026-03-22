@@ -78,5 +78,13 @@
   ["observatoryStatusChangedToIdle",		"Observatory status changed to idle",		1,	false],
   ["observatoryStatusChangedToOK",		"Observatory status changed to OK",		1,	false],
   ["observatoryStatusChangedToWarning",		"Observatory status changed to warning",	5,	true],
-  ["observatoryStatusChangedToAlert",		"Observatory status changed to alert",		10,	true]
+  ["observatoryStatusChangedToAlert",		"Observatory status changed to alert",		10,	true],
+  ["schedulerStatusChangedToIdle",		"Scheduler status changed to idle",		1,	false],
+  ["schedulerStatusChangedToStartup",		"Scheduler status changed to starting up",	1,	false],
+  ["schedulerStatusChangedToRunning",		"Scheduler status changed to running",		3,	true],
+  ["schedulerStatusChangedToPaused",		"Scheduler status changed to paused",		1,	false],
+  ["schedulerStatusChangedToShutdown",		"Scheduler status changed to shutdown",		5,	true],
+  ["schedulerStatusChangedToAborted",		"Scheduler status changed to aborted",		10,	true],
+  ["schedulerStatusChangedToLoading",		"Scheduler status changed to loading",		1,	false],
+  ["deviceConnected",				"Device connected",				1,	false]
 ]

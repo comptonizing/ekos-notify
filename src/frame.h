@@ -222,6 +222,7 @@ namespace EN {
                         bool onMountReady(const SignalData &data);
                         bool onObservatoryStatusChanged(const SignalData &data);
                         bool onSchedulerStatusChanged(const SignalData &data);
+                        bool onDeviceConnected(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -242,7 +243,8 @@ namespace EN {
                             &FrmMain::onMountPierSideChanged,
                             &FrmMain::onMountReady,
                             &FrmMain::onObservatoryStatusChanged,
-                            &FrmMain::onSchedulerStatusChanged
+                            &FrmMain::onSchedulerStatusChanged,
+                            &FrmMain::onDeviceConnected
                         };
 	};
 }
