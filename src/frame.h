@@ -173,6 +173,12 @@ namespace EN {
                             "mountStatusChangedToError"
                         };
 
+                        std::unordered_map<int,std::string> m_mountPierSideNotificationMap = {
+                            {-1, "mountPierSidechangedToUnknown"},
+                            {0, "mountPierSidechangedToWest"},
+                            {1, "mountPierSidechangedToEast"}
+                        };
+
                         struct SignalData {
                             const Glib::ustring sender;
                             const Glib::ustring object;
@@ -198,6 +204,7 @@ namespace EN {
                         bool onMountNewMeridianFlipSetup(const SignalData &data);
                         bool onMountParkStatusChanged(const SignalData &data);
                         bool onMountStatusChanged(const SignalData &data);
+                        bool onMountPierSideChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -214,7 +221,8 @@ namespace EN {
                             &FrmMain::onGuideStatusChanged,
                             &FrmMain::onMountNewMeridianFlipSetup,
                             &FrmMain::onMountParkStatusChanged,
-                            &FrmMain::onMountStatusChanged
+                            &FrmMain::onMountStatusChanged,
+                            &FrmMain::onMountPierSideChanged
                         };
 	};
 }

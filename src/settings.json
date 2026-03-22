@@ -69,5 +69,8 @@
   ["mountStatusChangedToTracking",		"Mount status changed to tracking",		1,	false],
   ["mountStatusChangedToParking",		"Mount status changed to parking",		1,	false],
   ["mountStatusChangedToParked",		"Mount status changed to parked",		3,	true],
-  ["mountStatusChangedToError",			"Mount status changed to error",		10,	true]
+  ["mountStatusChangedToError",			"Mount status changed to error",		10,	true],
+  ["mountPierSidechangedToUnknown",		"Mount pier side changed to unknown",		1,	false],
+  ["mountPierSidechangedToWest",		"Mount pier side changed to west",		1,	false],
+  ["mountPierSidechangedToEast",		"Mount pier side changed to east",		1,	false]
 ]
