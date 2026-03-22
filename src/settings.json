@@ -87,5 +87,11 @@
   ["schedulerStatusChangedToAborted",		"Scheduler status changed to aborted",		10,	true],
   ["schedulerStatusChangedToLoading",		"Scheduler status changed to loading",		1,	false],
   ["deviceConnected",				"Device connected",				1,	false],
-  ["deviceDisconnected",			"Device disconnected",				1,	false]
+  ["deviceDisconnected",			"Device disconnected",				1,	false],
+  ["domeParkStatusChangedToUnknown",		"Dome park status changed to unknown",		1,	false],
+  ["domeParkStatusChangedToParked",		"Dome park status changed to parked",		3,	true],
+  ["domeParkStatusChangedToParking",		"Dome park status changed to parking",		1,	false],
+  ["domeParkStatusChangedToUnparking",		"Dome park status changed to unparking",	1,	false],
+  ["domeParkStatusChangedToUnparked",		"Dome park status changed to unparked",		3,	true],
+  ["domeParkStatusChangedToError",		"Dome park status changed to error",		10,	true]
 ]

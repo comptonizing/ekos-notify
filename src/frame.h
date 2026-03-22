@@ -192,6 +192,12 @@ namespace EN {
                             "schedulerStatusChangedToLoading"
                         };
 
+                        std::vector<std::string> m_domeParkStatusNotificationMap = {
+                            "domeParkStatusChangedToUnknown", "domeParkStatusChangedToParked",
+                            "domeParkStatusChangedToParking", "domeParkStatusChangedToUnparking",
+                            "domeParkStatusChangedToUnparked", "domeParkStatusChangedToError"
+                        };
+
                         struct SignalData {
                             const Glib::ustring sender;
                             const Glib::ustring object;
@@ -224,6 +230,7 @@ namespace EN {
                         bool onSchedulerStatusChanged(const SignalData &data);
                         bool onDeviceConnected(const SignalData &data);
                         bool onDeviceDisconnected(const SignalData &data);
+                        bool onDomeParkStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -246,7 +253,8 @@ namespace EN {
                             &FrmMain::onObservatoryStatusChanged,
                             &FrmMain::onSchedulerStatusChanged,
                             &FrmMain::onDeviceConnected,
-                            &FrmMain::onDeviceDisconnected
+                            &FrmMain::onDeviceDisconnected,
+                            &FrmMain::onDomeParkStatusChanged
                         };
 	};
 }
