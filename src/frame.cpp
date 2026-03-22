@@ -225,6 +225,12 @@ bool FrmMain::onCaptureComplete(const SignalData &data) {
             stuff[name] = m_frameNameMap[Glib::VariantBase::cast_dynamic<Glib::Variant<int>>(value).get()];
             continue;
         }
+        if ( name == "hfr" || name == "eccentricity" ) {
+            char buff[32];
+            snprintf(buff, sizeof(buff)-1, "%.2f", Glib::VariantBase::cast_dynamic<Glib::Variant<double>>(value).get());
+            stuff[name] = std::string(buff);
+            continue;
+        }
         stuff[name] = value.print();
     }
 
