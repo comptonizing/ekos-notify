@@ -387,6 +387,7 @@ void FrmMain::initConfig() {
                             m_notificationDescriptions[ii] != m_defaultNotificationDescriptions[jj] ) {
                         log(std::string("Updating description for " + m_notificationIds[ii]) + "\n");
                         m_notificationDescriptions[ii] = m_defaultNotificationDescriptions[jj];
+                        modified = true;
                     }
                 }
             }
