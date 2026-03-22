@@ -223,6 +223,11 @@ namespace EN {
                             "dustcapStatusChangedToError", "dustcapStatusChangedToUnknown"
                         };
 
+                        std::vector<std::string> m_weatherStatusNotificationMap = {
+                            "weatherStatusChangedToIdle", "weatherStatusChangedToOK",
+                            "weatherStatusChangedToWarning", "weatherStatusChangedToAlert"
+                        };
+
                         struct SignalData {
                             const Glib::ustring sender;
                             const Glib::ustring object;
@@ -263,6 +268,7 @@ namespace EN {
                         bool onDustcapParkStatusChanged(const SignalData &data);
                         bool onDustcapStatusChanged(const SignalData &data);
                         bool onDustcapReady(const SignalData &data);
+                        bool onWeatherStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -293,7 +299,8 @@ namespace EN {
                             &FrmMain::onDomeReady,
                             &FrmMain::onDustcapParkStatusChanged,
                             &FrmMain::onDustcapStatusChanged,
-                            &FrmMain::onDustcapReady
+                            &FrmMain::onDustcapReady,
+                            &FrmMain::onWeatherStatusChanged
                         };
 	};
 }

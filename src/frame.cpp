@@ -613,6 +613,21 @@ bool FrmMain::onDustcapReady(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onWeatherStatusChanged(const SignalData &data) {
+    if ( data.signal != "newStatus" || data.object.rfind("/KStars/INDI/Weather/", 0) != 0 || data.interface != "org.kde.kstars.INDI.Weather" ) {
+        return false;
+    }
+    int status = extractStatus(data.parameters);
+    std::string nf = m_weatherStatusNotificationMap[status];
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    push(m_notificationMap[nf].description,
+         m_notificationMap[nf].description,
+         m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));
