@@ -73,5 +73,9 @@
   ["mountPierSidechangedToUnknown",		"Mount pier side changed to unknown",		1,	false],
   ["mountPierSidechangedToWest",		"Mount pier side changed to west",		1,	false],
   ["mountPierSidechangedToEast",		"Mount pier side changed to east",		1,	false],
-  ["mountReady",				"Mount ready",					1,	false]
+  ["mountReady",				"Mount ready",					1,	false],
+  ["observatoryStatusChangedToIdle",		"Observatory status changed to idle",		1,	false],
+  ["observatoryStatusChangedToOK",		"Observatory status changed to OK",		1,	false],
+  ["observatoryStatusChangedToWarning",		"Observatory status changed to warning",	5,	true],
+  ["observatoryStatusChangedToAlert",		"Observatory status changed to alert",		10,	true]
 ]

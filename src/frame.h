@@ -179,6 +179,11 @@ namespace EN {
                             {1, "mountPierSidechangedToEast"}
                         };
 
+                        std::vector<std::string> m_observatoryStatusNotificationMap = {
+                            "observatoryStatusChangedToIdle", "observatoryStatusChangedToOK",
+                            "observatoryStatusChangedToWarning", "observatoryStatusChangedToAlert"
+                        };
+
                         struct SignalData {
                             const Glib::ustring sender;
                             const Glib::ustring object;
@@ -206,6 +211,7 @@ namespace EN {
                         bool onMountStatusChanged(const SignalData &data);
                         bool onMountPierSideChanged(const SignalData &data);
                         bool onMountReady(const SignalData &data);
+                        bool onObservatoryStatusChanged(const SignalData &data);
 
                         std::vector<bool (FrmMain::*)(const SignalData &)> m_dispatchTable {
                             &FrmMain::onEkosStatusChanged,
@@ -224,7 +230,8 @@ namespace EN {
                             &FrmMain::onMountParkStatusChanged,
                             &FrmMain::onMountStatusChanged,
                             &FrmMain::onMountPierSideChanged,
-                            &FrmMain::onMountReady
+                            &FrmMain::onMountReady,
+                            &FrmMain::onObservatoryStatusChanged
                         };
 	};
 }
