@@ -479,6 +479,20 @@ bool FrmMain::onDeviceConnected(const SignalData &data) {
     return true;
 }
 
+bool FrmMain::onDeviceDisconnected(const SignalData &data) {
+    if ( data.signal != "Disconnected" || data.object.rfind("/KStars/INDI/", 0) != 0 || data.interface.rfind("org.kde.kstars.INDI.", 0) != 0) {
+        return false;
+    }
+    std::string nf = "deviceDisconnected";
+    if ( ! m_notificationMap[nf].enabled ) {
+        return true;
+    }
+    std::string device = getDeviceName(data);
+    std::string msg = "Device disconnected: " + device;
+    push(m_notificationMap[nf].description, msg, m_notificationMap[nf].priority);
+    return true;
+}
+
 void FrmMain::showError(Glib::ustring title, Glib::ustring message, Glib::ustring secondaryMessage) {
 	m_dialog.reset(new Gtk::MessageDialog(*this, message, false,
 				Gtk::MessageType::MESSAGE_ERROR, Gtk::ButtonsType::BUTTONS_OK, true));

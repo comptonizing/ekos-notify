@@ -86,5 +86,6 @@
   ["schedulerStatusChangedToShutdown",		"Scheduler status changed to shutdown",		5,	true],
   ["schedulerStatusChangedToAborted",		"Scheduler status changed to aborted",		10,	true],
   ["schedulerStatusChangedToLoading",		"Scheduler status changed to loading",		1,	false],
-  ["deviceConnected",				"Device connected",				1,	false]
+  ["deviceConnected",				"Device connected",				1,	false],
+  ["deviceDisconnected",			"Device disconnected",				1,	false]
 ]
